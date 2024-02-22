@@ -45,10 +45,15 @@ const EyeTrackingComponent = () => {
   };
 
   // Generate a list of items to scroll through
-  const scrollableContent = Array.from({ length: 100 }).map((_, index) => (
+  const scrollableContent = Array.from({ length: 20 }).map((_, index) => (
     <div
       key={index}
-      style={{ padding: "10px", border: "1px solid #ccc", margin: "5px 0" }}
+      style={{
+        padding: "10px",
+        border: "1px solid #ccc",
+        margin: "5px 0",
+        height: "200px",
+      }}
     >
       Item {index + 1}
     </div>
