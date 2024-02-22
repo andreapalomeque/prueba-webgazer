@@ -7,7 +7,7 @@ export default function Home() {
       <h1 className="text-4xl font-bold text-white mb-8">
         Testing WebGazer.js
       </h1>
-      <Link href="/form">
+      <Link href="/eye-tracking">
         <SubmitButton text="Empezar" />
       </Link>
     </div>
