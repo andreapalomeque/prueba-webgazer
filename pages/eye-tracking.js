@@ -1,8 +1,10 @@
 import Script from "next/script";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const EyeTrackingComponent = () => {
   const [webGazerReady, setWebGazerReady] = useState(false);
+  const focusTimer = useRef(null);
+  const focusedElement = useRef(null);
 
   useEffect(() => {
     const initializeWebGazer = () => {
@@ -12,11 +14,9 @@ const EyeTrackingComponent = () => {
             return;
           }
           handleGaze(data);
-          console.log(data, elapsedTime); //? elapsed time -> tiempo transcurrido
         })
-        .begin() //!starts the data collection that enables the predictions
+        .begin()
         .then(() => {
-          console.log("WebGazer has started.");
           setWebGazerReady(true);
         });
     };
@@ -33,50 +33,73 @@ const EyeTrackingComponent = () => {
   }, []);
 
   const handleGaze = (data) => {
-    // Define trigger zones for scrolling (e.g., top 10% and bottom 10% of the viewport)
-    const triggerZoneSize = window.innerHeight * 0.1; // 10% of the viewport height
-    if (data.y < triggerZoneSize) {
-      // Gaze is in the top trigger zone, scroll up
-      window.scrollBy(0, -10); // Adjust the scrolling speed as needed
-    } else if (data.y > window.innerHeight - triggerZoneSize) {
-      // Gaze is in the bottom trigger zone, scroll down
-      window.scrollBy(0, 10); // Adjust the scrolling speed as needed
+    // la logica del scroll que iba aca no se va a implementar -> CANCELAR SCROLL
+    checkForGazeClick(data); //LOGICA DE CLICK
+  };
+
+  const checkForGazeClick = (data) => {
+    const elements = document.elementsFromPoint(data.x, data.y);
+    const clickable = elements.find((el) => el.classList.contains("clickable"));
+    if (clickable && focusedElement.current !== clickable) {
+      if (focusTimer.current) clearTimeout(focusTimer.current);
+      focusedElement.current = clickable;
+      focusTimer.current = setTimeout(() => {
+        clickable.click();
+        resetFocus();
+      }, 3000); // Wait for 3 seconds of focus before clicking
+    } else if (!clickable) {
+      resetFocus();
     }
   };
 
-  // Generate a list of items to scroll through
-  const scrollableContent = Array.from({ length: 20 }).map((_, index) => (
+  const resetFocus = () => {
+    if (focusTimer.current) clearTimeout(focusTimer.current);
+    focusTimer.current = null;
+    focusedElement.current = null;
+  };
+
+  const horizontalContent = (
     <div
-      key={index}
       style={{
-        padding: "10px",
-        border: "1px solid #ccc",
-        margin: "5px 0",
-        height: "200px",
+        display: "flex", // Use flexbox for horizontal layout
+        justifyContent: "space-around", // Space out items evenly
+        alignItems: "center", // Center items vertically
+        height: "90vh", // Adjust height as needed
       }}
     >
-      Item {index + 1}
+      {[1, 2, 3].map((index) => (
+        <div
+          key={index}
+          className="clickable" // Keep items clickable
+          onClick={() => alert(`Item ${index} clicked`)}
+          style={{
+            width: "30%", // Each item takes up roughly a third of the container width
+            height: "80%", // Adjust height as needed
+            border: "1px solid #ccc",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "2em", // Increase font size for visibility
+          }}
+        >
+          Item {index}
+        </div>
+      ))}
     </div>
-  ));
+  );
 
   return (
     <>
       <Script
         src="/webgazer.js"
-        onLoad={() => {
-          window.dispatchEvent(new Event("webgazerLoaded"));
-        }}
+        onLoad={() => window.dispatchEvent(new Event("webgazerLoaded"))}
         strategy="lazyOnload"
       />
       {webGazerReady ? (
         <div>
-          <div>
-            Eye tracking is ready. Look at this text, and your gaze will be
-            tracked.
-          </div>
-          {/* Render scrollable content inside a container with a fixed height and overflow set to auto */}
+          <div>Eye tracking is ready. Look at items to click them.</div>
           <div style={{ height: "auto", overflowY: "auto" }}>
-            {scrollableContent}
+            {horizontalContent}
           </div>
         </div>
       ) : (

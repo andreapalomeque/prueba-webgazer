@@ -40,7 +40,7 @@ const Calibration = () => {
     };
 
     checkWebGazerReady();
-  }, []);
+  }, []); //empty array to run only once
 
   // Define points with initial color (red) and positions
   const initialPoints = [
@@ -58,24 +58,32 @@ const Calibration = () => {
   const [points, setPoints] = useState(initialPoints);
 
   const handleCalibrationClick = (index) => {
-    // Update the color of the clicked point
+    // Update the click count and color of the clicked point
     const newPoints = points.map((point, idx) => {
       if (idx === index) {
-        const nextColor = point.color === "red" ? "yellow" : "green";
-        return { ...point, color: nextColor };
+        let nextColor = point.color;
+        let nextClickCount = (point.clickCount || 0) + 1; // Increment click count, initialize if not present
+
+        // Change color after every 10 clicks
+        if (nextClickCount % 10 === 0) {
+          if (nextColor === "red") nextColor = "yellow";
+          else if (nextColor === "yellow") nextColor = "green";
+          else nextColor = point.color; // Keep the current color
+        }
+
+        return { ...point, color: nextColor, clickCount: nextClickCount };
       }
       return point;
     });
     setPoints(newPoints);
 
-    // Check if all points are green
+    // Check if all points are green (or whatever logic you have for calibration completion)
     if (newPoints.every((point) => point.color === "green")) {
       onCalibrationComplete();
     }
   };
 
   const onCalibrationComplete = () => {
-    //alert("Calibration complete!");
     router.push("/eye-tracking");
   };
 
