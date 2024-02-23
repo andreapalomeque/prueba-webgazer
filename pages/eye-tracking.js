@@ -7,8 +7,11 @@ const EyeTrackingComponent = () => {
   const focusedElement = useRef(null);
 
   useEffect(() => {
+    //access localforage to see the data being saved
+
     const initializeWebGazer = () => {
       window.webgazer
+        .saveDataAcrossSessions(true)
         .setGazeListener((data, elapsedTime) => {
           if (data == null) {
             return;

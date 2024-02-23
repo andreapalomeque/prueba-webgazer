@@ -2,16 +2,27 @@
 import React, { useEffect, useState } from "react";
 import Script from "next/script";
 import { useRouter } from "next/router";
+import localforage from "localforage";
 
 const Calibration = () => {
   const router = useRouter();
   const [webGazerReady, setWebGazerReady] = useState(false);
 
   useEffect(() => {
+    // check that data is being saved, catch the error if it is not
+    localforage
+      .getItem("webgazerGlobalData")
+      .then(function (value) {
+        console.log("data saving", value);
+      })
+      .catch(function (err) {
+        console.error("Error retrieving webgazerGlobalData:", err);
+      });
     // Function to check if WebGazer is ready
     const checkWebGazerReady = () => {
       if (window.webgazer) {
         window.webgazer
+          .saveDataAcrossSessions(true) //! check if this is necessary
           .setGazeListener((data, elapsedTime) => {
             if (!data) return;
             console.log(data, elapsedTime);
