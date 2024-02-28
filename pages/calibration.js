@@ -95,7 +95,7 @@ const Calibration = () => {
   };
 
   const onCalibrationComplete = () => {
-    router.push("/eye-tracking");
+    router.push("/simplifiedCalibration");
   };
 
   return (
