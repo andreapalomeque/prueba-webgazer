@@ -1,3 +1,5 @@
+let collectGazeData = false; // Control variable outside the component
+
 import React, { useEffect, useState } from "react";
 import Script from "next/script";
 import localforage from "localforage";
@@ -6,30 +8,46 @@ const SimplifiedCalibration = () => {
   const [webGazerReady, setWebGazerReady] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [predictionPoints, setPredictionPoints] = useState([]);
-  const [displayPoints, setDisplayPoints] = useState(false); // New state to control the display mode
+  const [displayPoints, setDisplayPoints] = useState(false);
 
   useEffect(() => {
     const initializeWebGazer = () => {
       if (window.webgazer) {
         window.webgazer
           .setGazeListener((data, elapsedTime) => {
-            if (data) {
+            if (data && collectGazeData) {
+              // Use external control variable
               setPredictionPoints((prevPoints) => [...prevPoints, data]);
             }
           })
           .begin()
-          .then(() => {
-            setWebGazerReady(true);
-          });
+          .then(() => setWebGazerReady(true));
       }
     };
 
     document.addEventListener("webgazerLoaded", initializeWebGazer);
     return () => {
       document.removeEventListener("webgazerLoaded", initializeWebGazer);
-      window.webgazer && window.webgazer.end(); // Clean up on component unmount
+      window.webgazer && window.webgazer.end();
     };
   }, []);
+
+  const handleCentralPointClick = () => {
+    if (clickCount === 0) {
+      collectGazeData = true; // Enable data collection on first click
+    }
+
+    const newClickCount = clickCount + 1;
+    setClickCount(newClickCount);
+
+    if (newClickCount >= 20) {
+      setDisplayPoints(true);
+      window.webgazer.end(); // Optionally stop WebGazer
+      setGlobalData("webgazerGlobalData", predictionPoints).then(() =>
+        console.log("Prediction points have been saved.")
+      );
+    }
+  };
 
   const setGlobalData = async (key, data) => {
     try {
@@ -37,23 +55,6 @@ const SimplifiedCalibration = () => {
       console.log(`Data stored successfully under key ${key}`);
     } catch (error) {
       console.error(`Error storing data under key ${key}:`, error);
-    }
-  };
-
-  const handleCentralPointClick = () => {
-    if (clickCount < 20) {
-      setClickCount(clickCount + 1);
-    } else {
-      // Once 20 clicks are reached, switch to display mode
-      setDisplayPoints(true);
-      console.log("Displaying points", predictionPoints);
-
-      // Save the predictionPoints to localforage
-      setGlobalData("webgazerGlobalData", predictionPoints).then(() => {
-        console.log("Prediction points have been saved.");
-      });
-      //stop webgazer
-      window.webgazer.end();
     }
   };
 
