@@ -49,7 +49,7 @@ const EyeTrackingComponent = () => {
       focusTimer.current = setTimeout(() => {
         clickable.click();
         resetFocus();
-      }, 3000); // Wait for 3 seconds of focus before clicking
+      }, 5000); // Wait for 5 seconds of focus before clicking
     } else if (!clickable) {
       resetFocus();
     }
@@ -68,6 +68,8 @@ const EyeTrackingComponent = () => {
         justifyContent: "space-around", // Space out items evenly
         alignItems: "center", // Center items vertically
         height: "90vh", // Adjust height as needed
+        backgroundColor: "white", // Ensure background is white
+        color: "black", // Ensure text is black
       }}
     >
       {[1, 2, 3].map((index) => (
@@ -99,7 +101,12 @@ const EyeTrackingComponent = () => {
         strategy="lazyOnload"
       />
       {webGazerReady ? (
-        <div>
+        <div
+          style={{
+            backgroundColor: "white", // Ensure background is white
+            color: "black", // Ensure text is black
+          }}
+        >
           <div>Eye tracking is ready. Look at items to click them.</div>
           <div style={{ height: "auto", overflowY: "auto" }}>
             {horizontalContent}

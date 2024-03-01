@@ -3,8 +3,11 @@ let collectGazeData = false; // Control variable outside the component
 import React, { useEffect, useState } from "react";
 import Script from "next/script";
 import localforage from "localforage";
+import Swal from "sweetalert2";
+import { useRouter } from "next/router";
 
 const SimplifiedCalibration = () => {
+  const router = useRouter();
   const [webGazerReady, setWebGazerReady] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [predictionPoints, setPredictionPoints] = useState([]);
@@ -79,6 +82,28 @@ const SimplifiedCalibration = () => {
     link.click(); // This will download the file
   };
 
+  // Function to show the alert
+  const showCalibrationCompleteAlert = () => {
+    Swal.fire({
+      title: "Calibration Complete",
+      text: "Do you want to redo the calibration or move to the next step?",
+      icon: "success",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Next Step",
+      cancelButtonText: "Redo Calibration",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // move to eye-tracking page
+        router.push("/calibration");
+      } else {
+        // Logic to redo calibration
+        window.location.reload(); // Simple way to restart the calibration
+      }
+    });
+  };
+
   return (
     <>
       <Script
@@ -125,7 +150,24 @@ const SimplifiedCalibration = () => {
                 backgroundColor: "blue",
                 borderRadius: "50%",
               }}
-            ></div>
+            >
+              <button
+                onClick={showCalibrationCompleteAlert}
+                style={{
+                  position: "fixed",
+                  bottom: "20px",
+                  right: "20px",
+                  padding: "10px 20px",
+                  backgroundColor: "green",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Next Step
+              </button>
+            </div>
           ))}
         </div>
       )}

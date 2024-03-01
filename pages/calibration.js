@@ -95,7 +95,7 @@ const Calibration = () => {
   };
 
   const onCalibrationComplete = () => {
-    router.push("/simplifiedCalibration");
+    router.push("/eye-tracking");
   };
 
   return (
@@ -108,7 +108,15 @@ const Calibration = () => {
         strategy="lazyOnload"
       />
       {webGazerReady ? (
-        <div style={{ position: "relative", height: "100vh", width: "100vw" }}>
+        <div
+          style={{
+            position: "relative",
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "white",
+            color: "black",
+          }}
+        >
           {points.map((point, index) => (
             <div
               key={index}
