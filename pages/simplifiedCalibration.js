@@ -46,6 +46,7 @@ const SimplifiedCalibration = () => {
       setGlobalData("webgazerGlobalData", predictionPoints).then(() =>
         console.log("Prediction points have been saved.")
       );
+      downloadCSV(predictionPoints); // Download the data as CSV
     }
   };
 
@@ -56,6 +57,23 @@ const SimplifiedCalibration = () => {
     } catch (error) {
       console.error(`Error storing data under key ${key}:`, error);
     }
+  };
+
+  // Function to download data as CSV
+  const downloadCSV = (data) => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "X,Y\n"; // Header row for CSV file
+    data.forEach((point) => {
+      csvContent += `${point.x},${point.y}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "predictionPoints.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click(); // This will download the file
   };
 
   return (
