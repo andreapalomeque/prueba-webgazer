@@ -16,8 +16,10 @@ const SimplifiedCalibration = () => {
         window.webgazer
           .setGazeListener((data, elapsedTime) => {
             if (data && collectGazeData) {
-              // Use external control variable
-              setPredictionPoints((prevPoints) => [...prevPoints, data]);
+              setPredictionPoints((prevPoints) => [
+                ...prevPoints,
+                { ...data, elapsedTime },
+              ]);
             }
           })
           .begin()
@@ -62,9 +64,10 @@ const SimplifiedCalibration = () => {
   // Function to download data as CSV
   const downloadCSV = (data) => {
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "X,Y\n"; // Header row for CSV file
-    data.forEach((point) => {
-      csvContent += `${point.x},${point.y}\n`;
+    // Include elapsedTime in the header
+    csvContent += "X,Y,ElapsedTime\n";
+    data.forEach(({ x, y, elapsedTime }) => {
+      csvContent += `${x},${y},${elapsedTime}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
